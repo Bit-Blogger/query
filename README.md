@@ -1,127 +1,213 @@
-# Student Database Management (MySQL)
+# Student Database Management System (MySQL)
 
-## Project Overview
+##  Project Overview
 
-This project demonstrates basic MySQL operations using a `STUDENT` table. It covers fundamental SQL concepts such as table creation, inserting data, querying records, updating values, and deleting entries. The aim of this project is to build a clear understanding of how relational databases work in practice.
+This project demonstrates a **relational database system** using MySQL with multiple tables: `STUDENT`, `COURSE`, and `SCORE`.
+It covers core SQL concepts such as **table creation, relationships, joins, aggregations, and subqueries**.
+
+The goal of this project is to build a strong foundation in handling structured data and writing efficient SQL queries for real-world scenarios.
 
 ---
 
-## Technologies Used
+##  Technologies Used
 
 * MySQL
 * SQL (Structured Query Language)
 
 ---
 
-## Table Structure
+##  Database Structure
+
+### 1. STUDENT Table
+
+Stores student details.
 
 ```sql
 CREATE TABLE STUDENT(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    age INT NOT NULL,
-    marks INT NOT NULL
+   STUDENT_ID INT AUTO_INCREMENT PRIMARY KEY,
+   NAME VARCHAR(100) NOT NULL,
+   AGE INT,
+   GENDER ENUM('MALE','FEMALE','OTHER'),
+   CITY VARCHAR(100) NOT NULL
 );
 ```
 
 ---
 
-## Data Insertion
+### 2. COURSE Table
 
-The table contains 25 student records with the following fields:
+Stores course information.
 
-* ID
-* Name
-* Age
-* Marks
-
----
-
-## Operations Performed
-
-### Basic Queries
-
-* Retrieved all records from the table
-* Displayed selected columns such as name and marks
-
-### Table Modification
-
-* Added a new column `city`
-* Added and later removed the column `email`
-
-### Update Operations
-
-* Assigned city values using a CASE statement
-* Updated marks for a specific student
-
-### Delete Operation
-
-* Removed a student record using the student ID
+```sql
+CREATE TABLE COURSE(
+   COURSE_ID INT AUTO_INCREMENT PRIMARY KEY,
+   COURSE_NAME VARCHAR(100) NOT NULL
+);
+```
 
 ---
 
-## Data Retrieval Queries
+### 3. SCORE Table
 
-### Filtering
+Acts as a bridge between STUDENT and COURSE, storing marks.
 
-* Students who scored more than 75 marks
-* Students with a specific name
-* Names starting with 'A'
-* Names ending with 'n'
-* Students with marks between 60 and 80
-
-### Sorting
-
-* Sorted records in ascending order of marks
-* Sorted records in descending order of marks
-
-### Top Performers
-
-* Retrieved top 3 students based on marks
+```sql
+CREATE TABLE SCORE(
+   MARK_ID INT AUTO_INCREMENT PRIMARY KEY,
+   STUDENT_ID INT,
+   COURSE_ID INT,
+   MARKS INT,
+   FOREIGN KEY(STUDENT_ID) REFERENCES STUDENT(STUDENT_ID),
+   FOREIGN KEY(COURSE_ID) REFERENCES COURSE(COURSE_ID)
+);
+```
 
 ---
 
-## Aggregate Functions
+##  Relationships
 
-* Counted total number of students using `COUNT(*)`
-* Calculated average marks using `AVG()`
-* Identified minimum and maximum marks using `MIN()` and `MAX()`
-* Calculated total marks grouped by age using `SUM()`
-
----
-
-## Grouping
-
-* Counted number of students for each age group
-* Calculated total marks for each age group
+* One student can enroll in multiple courses
+* One course can have multiple students
+* `SCORE` table connects both using foreign keys
 
 ---
 
-## Key Concepts Covered
+##  Sample Data
 
-* DDL (CREATE, ALTER, DROP)
-* DML (INSERT, UPDATE, DELETE)
-* Filtering using WHERE, LIKE, BETWEEN
-* Sorting using ORDER BY
-* Grouping using GROUP BY
-* Aggregate functions
+Example student records:
 
----
+```sql
+('Aarav Sharma', 19, 'MALE', 'Pune'),
+('Ananya Gupta', 20, 'FEMALE', 'Delhi'),
+('Rohan Patil', 21, 'MALE', 'Mumbai')
+```
 
-## Learning Outcome
+Example score records:
 
-This project provides a practical understanding of database operations and helps in writing structured and efficient SQL queries. It also builds a foundation for working with real-world datasets.
-
----
-
-## Future Improvements
-
-* Implement advanced queries such as JOINs and subqueries
-* Create relationships between multiple tables
-* Develop a simple user interface to interact with the database
+```sql
+(1, 1, 85),
+(2, 5, 78),
+(3, 2, 92)
+```
 
 ---
 
-## Author
+## 🔍 Key Queries Implemented
+
+### 1. Average Age of Students
+
+```sql
+SELECT AVG(AGE) AS AVG_AGE FROM STUDENT;
+```
+
+---
+
+### 2. Average Marks per Student
+
+```sql
+SELECT STUDENT_ID, AVG(MARKS) AS AVG_MARKS
+FROM SCORE
+GROUP BY STUDENT_ID;
+```
+
+---
+
+### 3. Highest Marks in Each Course
+
+```sql
+SELECT COURSE_ID, MAX(MARKS) AS HIGHEST_MARKS
+FROM SCORE
+GROUP BY COURSE_ID;
+```
+
+---
+
+### 4. Display Student + Course + Marks (JOIN)
+
+```sql
+SELECT 
+    STUDENT.STUDENT_ID,
+    STUDENT.NAME,
+    COURSE.COURSE_NAME,
+    SCORE.MARKS
+FROM SCORE
+JOIN STUDENT ON STUDENT.STUDENT_ID = SCORE.STUDENT_ID
+JOIN COURSE ON COURSE.COURSE_ID = SCORE.COURSE_ID;
+```
+
+---
+
+### 5. Student with Highest Marks Overall
+
+```sql
+SELECT 
+   STUDENT.NAME,
+   COURSE.COURSE_NAME, 
+   SCORE.MARKS 
+FROM SCORE
+JOIN STUDENT ON STUDENT.STUDENT_ID = SCORE.STUDENT_ID
+JOIN COURSE ON COURSE.COURSE_ID = SCORE.COURSE_ID
+WHERE SCORE.MARKS = (SELECT MAX(MARKS) FROM SCORE);
+```
+
+---
+
+### 6. Students Scoring More Than 80
+
+```sql
+SELECT 
+ STUDENT.NAME,
+ SCORE.MARKS
+FROM SCORE
+JOIN STUDENT ON STUDENT.STUDENT_ID = SCORE.STUDENT_ID
+WHERE MARKS > 80;
+```
+
+---
+
+### 7. Highest Marks per Student
+
+```sql
+SELECT
+   STUDENT.NAME,
+   MAX(SCORE.MARKS) AS HIGHEST_MARKS
+FROM SCORE
+JOIN STUDENT ON STUDENT.STUDENT_ID = SCORE.STUDENT_ID
+GROUP BY STUDENT.NAME;
+```
+
+---
+
+##  Concepts Covered
+
+* DDL (CREATE, ALTER)
+* DML (INSERT, SELECT)
+* JOIN operations (INNER JOIN)
+* Aggregate functions (AVG, MAX, COUNT)
+* GROUP BY
+* Subqueries
+* Filtering using WHERE
+
+---
+
+##  Learning Outcome
+
+* Understanding of **relational database design**
+* Hands-on experience with **multi-table queries**
+* Ability to write **optimized SQL queries using joins and aggregation**
+* Foundation for **data analysis and backend development**
+
+---
+
+##  Future Improvements
+
+* Implement advanced queries (window functions, nested subqueries)
+* Add more realistic datasets
+* Integrate with Python (Pandas + MySQL)
+* Build a simple dashboard for data visualization
+
+---
+
+##  Author
 
 ATHARVA TIWARI
